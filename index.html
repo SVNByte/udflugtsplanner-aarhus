@@ -216,6 +216,7 @@
           <option value="natur">Natur / gåtur</option>
           <option value="indendoers">Indendørs</option>
           <option value="bad">Bad / bevægelse</option>
+          <option value="bondegaard">Bondegård / dyr</option>
           <option value="heldag">Heldagsudflugt</option>
         </select>
         <input type="text" id="newArea" placeholder="Adresse / område (valgfrit)">
@@ -260,6 +261,8 @@ const SEED_IDEAS = [
   {name:"Marselisborg Dyrehave", cat:"natur", area:"Ørneredevej, Højbjerg", distanceKm:5.5, note:"Gratis skovtur hvor I ofte kan komme tæt på de tamme rådyr. Brede, jævne stier, så barnevognen ruller nemt hele vejen.", indoor:false, toddler:true},
   {name:"Moesgaard Strand & Skov", cat:"natur", area:"Moesgård Allé, Højbjerg", distanceKm:8, note:"Strand, skov og bakket terræn samlet ét sted – I kan selv vælge om det bliver en kort gåtur eller en hel eftermiddag med madpakke.", indoor:false, toddler:true},
   {name:"Risskov / Den Permanente", cat:"natur", area:"Risskov", distanceKm:5, note:"Strand og skov tæt på midtbyen. God til en kort frisk-luft-tur, evt. kombineret med en is fra kiosken om sommeren.", indoor:false, toddler:true},
+  {name:"Mindeparken – kastanjejagt og legeplads", cat:"natur", area:"Mindeparken, ved Marselisborg Slot, Aarhus C", distanceKm:6, note:"Gå en tur under de store kastanjetræer og saml kastanjer om efteråret, og slut af på den store legeplads med klatretårne, rutsjebaner, gyngestativer og blødt gummiunderlag – oplagt for en 15-måneders. Kiosk med is og kaffe, og toiletter på stedet.", indoor:false, toddler:true},
+  {name:"Dyrehaven Skanderborg – vilde dådyr", cat:"natur", area:"Dyrehaven 7, 8660 Skanderborg", distanceKm:27, note:"Frit gående dådyr ved Svanesø og skovstier langs tre søer. Legeplads og café på stedet, så det kan sagtens blive en hel formiddag. Ca. 25-30 min. kørsel, så planlæg luren i god tid.", indoor:false, toddler:true},
 
   {name:"Naturhistorisk Museum", cat:"indendoers", area:"Wilhelm Meyers Allé, Aarhus C", distanceKm:2, note:"Gratis entré for børn. Udstoppede dyr og små udstillinger i børnehøjde – ikke stort, men perfekt dosis for en 15-måneders på en kold eller våd dag.", indoor:true, toddler:true},
   {name:"Væksthusene, Botanisk Have", cat:"indendoers", area:"Peter Holms Vej, Aarhus C", distanceKm:2, note:"Fire varme klimazoner med planter og fisk. Gratis entré, og bare det at gå fra tropisk til køligt hus er en oplevelse i sig selv for en lille.", indoor:true, toddler:true},
@@ -267,6 +270,9 @@ const SEED_IDEAS = [
   {name:"Globus1 – lørdagsleg (0-6 år)", cat:"indendoers", area:"Gudrunsvej 3A, Brabrand", distanceKm:2.5, note:"Gratis forhindringsbane og fri leg i idrætshallen, første lørdag i måneden kl. 9-12. Ingen tilmelding – I møder bare op.", indoor:true, toddler:true, schedule:{day:6, nth:1, label:"kun 1. lørdag i måneden, kl. 9-12"}},
   {name:"Springcenter Aarhus – Søndagsræs", cat:"bad", area:"Hvidkildevej 11, Risskov", distanceKm:6, note:"Fri leg i to gymnastiksale. Tidsrummet 15:00-16:30 er for 1-4-årige (andre aldersgrupper har slots tidligere om dagen). 60 kr. pr. barn og voksen, ingen tilmelding for enkeltbesøg. Sæson løber ca. medio september til slut april.", indoor:true, toddler:true, schedule:{day:0, label:"kun søndage, jeres slot kl. 15:00-16:30"}},
   {name:"Gellerupbadet – Plask & Leg", cat:"bad", area:"Dortesvej 43, Brabrand", distanceKm:1.5, note:"Søndage kl. 9:00-10:00 er der plask & leg for 1-5-årige med livredder til rådighed, der guider aktiviteter i bassinet. Kræver tilmelding via 'By i Bevægelse'.", indoor:true, toddler:true, schedule:{day:0, label:"kun søndage, kl. 9:00-10:00"}},
+
+  {name:"Gartnergaarden – dyr og gamle traktorer", cat:"bondegaard", area:"Skovlundvej 15, 8541 Skødstrup", distanceKm:19, note:"Skotsk højlandskvæg, geder, grise, høns og kaniner, som gerne vil klappes, plus to gamle traktorer I må kravle op på og en pyramide af halmballer at hoppe i. Gårdbutik med bageri, mosteri og hyggelig café til bagefter. Sæsonåbent – tjek ggaarhus.dk for åbningsdage inden turen.", indoor:false, toddler:true},
+  {name:"Vilhelmsborg – stalde og heste", cat:"bondegaard", area:"Vilhelmsborg Allé 1, 8320 Mårslet", distanceKm:13, note:"Det Nationale Hestesportscenter, hvor I frit kan gå rundt mellem stalde og ridehaller og se hestene helt tæt på. Skoven omkring gården har gamle stendysser at gå en tur til, og alléen med kastanjetræer er flot om efteråret. Ponyridetur kræver forudgående aftale med Aarhus Rideklub.", indoor:false, toddler:true},
 
   {name:"Tivoli Friheden", cat:"heldag", area:"Skovbrynet 5, Aarhus C", distanceKm:3, note:"Aarhus' forlystelsespark, kun 5 min. i bil. Sæsonåbent (tjek friheden.dk for aktuelle åbningsdage) med en børneafdeling med rolige karruseller, som fungerer fint for en 15-måneders. God til en heldag med frokostpause på stedet.", indoor:false, toddler:true},
   {name:"Moesgaard Museum, strand & skov – hele dagen", cat:"heldag", area:"Moesgård Allé 15, Højbjerg", distanceKm:8, note:"Kombiner et kort museumsbesøg (gratis for børn) med skoven og stranden ned til vandet. God plads til at planlægge luren omkring – enten kør hjem midt på dagen, eller lad ham sove i klapvognen på stedet.", indoor:true, toddler:true},
@@ -502,7 +508,7 @@ function renderWeather(){
 }
 
 /* ---------- IDEA RENDERING ---------- */
-const CAT_LABELS = {alle:"Alle", legeplads:"Legepladser", natur:"Natur/gåtur", indendoers:"Indendørs", bad:"Bad/bevægelse", heldag:"Heldagsudflugt"};
+const CAT_LABELS = {alle:"Alle", legeplads:"Legepladser", natur:"Natur/gåtur", indendoers:"Indendørs", bad:"Bad/bevægelse", bondegaard:"Bondegård/dyr", heldag:"Heldagsudflugt"};
 
 function renderCatFilter(){
   const bar = document.getElementById('catFilter');
