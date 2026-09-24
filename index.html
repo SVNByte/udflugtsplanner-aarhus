@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Udflugtsplanner â Aarhus</title>
+<style>
+  :root{
+    --bg:#faf7f2;
+    --card:#ffffff;
+    --ink:#2b2620;
+    --muted:#7a7268;
+    --accent:#e07a45;
+    --accent-dark:#c05f2f;
+    --sun:#f0a93c;
+    --rain:#4a7fa6;
+    --green:#5c8a5c;
+    --border:#e8e0d5;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    padding-bottom:60px;
+  }
+  header{
+    background:linear-gradient(135deg,#e07a45,#c05f2f);
+    color:white;
+    padding:22px 18px 26px;
+    text-align:center;
+  }
+  header h1{margin:0 0 4px;font-size:1.5rem;}
+  header p{margin:0;opacity:.92;font-size:.92rem;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 14px;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin-top:16px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h2{margin:0 0 10px;font-size:1.05rem;display:flex;align-items:center;gap:8px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;}
+  .pill-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+  .pill{
+    border:1px solid var(--border);
+    background:#fff;
+    padding:8px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    font-size:.88rem;
+    color:var(--ink);
+    transition:all .15s;
+    user-select:none;
+  }
+  .pill.active{background:var(--accent);color:white;border-color:var(--accent);}
+  .pill:hover{border-color:var(--accent);}
+  .weather-days{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;}
+  .wday{
+    flex:1 0 90px;
+    text-align:center;
+    background:#fbf5ee;
+    border-radius:10px;
+    padding:10px 6px;
+    font-size:.82rem;
+  }
+  .wday .icon{font-size:1.8rem;line-height:1;}
+  .wday .lbl{font-weight:600;color:var(--muted);margin-bottom:2px;text-transform:capitalize;}
+  .wday .temp{font-weight:600;margin-top:2px;}
+  .wday .rain{color:var(--rain);font-size:.78rem;}
+  .wday.selected{background:#fce6d4;outline:2px solid var(--accent);}
+  .idea .tag.miss{background:#f7e2df;color:#a0453a;}
+  .idea .tag.hit{background:#e2f1e6;color:var(--green);}
+  .status-line{font-size:.85rem;color:var(--muted);margin-top:8px;}
+  .schedule-note{
+    background:#f4efe4;
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:.85rem;
+    color:var(--muted);
+    margin-top:4px;
+  }
+  button.big{
+    width:100%;
+    padding:14px;
+    font-size:1.05rem;
+    font-weight:600;
+    border:none;
+    border-radius:12px;
+    background:var(--accent);
+    color:white;
+    cursor:pointer;
+    margin-top:6px;
+  }
+  button.big:hover{background:var(--accent-dark);}
+  .carousel-controls{display:flex;gap:8px;align-items:stretch;margin-top:6px;}
+  .nav-btn{
+    padding:0 16px;
+    font-size:.95rem;
+    font-weight:600;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .nav-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent-dark);}
+  .nav-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .suggestion{
+    margin-top:14px;
+    border:2px solid var(--accent);
+    border-radius:12px;
+    padding:14px;
+    background:#fff8f2;
+  }
+  .suggestion h3{margin:0 0 4px;font-size:1.1rem;}
+  .suggestion .meta{font-size:.85rem;color:var(--muted);margin-bottom:6px;}
+  .suggestion a{color:var(--accent-dark);font-weight:600;text-decoration:none;font-size:.85rem;}
+  .idea-list{list-style:none;margin:0;padding:0;}
+  .idea{
+    border-bottom:1px solid var(--border);
+    padding:10px 0;
+  }
+  .idea:last-child{border-bottom:none;}
+  .idea .name{font-weight:600;}
+  .idea .tag{
+    display:inline-block;
+    font-size:.72rem;
+    background:#eee;
+    border-radius:6px;
+    padding:1px 7px;
+    margin-left:6px;
+    color:var(--muted);
+    vertical-align:middle;
+  }
+  .idea .note{font-size:.85rem;color:var(--muted);margin-top:2px;}
+  .idea .tag.dist{background:#eaf2e8;color:var(--green);}
+  .idea a.map{font-size:.78rem;color:var(--accent-dark);}
+  .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+  details summary{cursor:pointer;font-weight:600;padding:4px 0;}
+  .add-form{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+  .add-form input, .add-form select, .add-form textarea{
+    padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:.9rem;font-family:inherit;
+  }
+  .links a{display:block;font-size:.88rem;margin:4px 0;color:var(--accent-dark);}
+  .small-btn{
+    font-size:.8rem;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;
+  }
+  .footer-note{text-align:center;font-size:.78rem;color:var(--muted);margin-top:20px;}
+  .star{cursor:pointer;color:#ccc;}
+  .star.on{color:var(--sun);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ð§¸ Udflugtsplanner â Aarhus</h1>
+  <p>IdÃ©er og forslag afstemt efter vejr, tid pÃ¥ dagen, lurtider og afstand fra Frodesvej 28, ÃbyhÃ¸j</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card" id="weatherCard">
+    <h2>ð¤ï¸ Vejret ved ÃbyhÃ¸j</h2>
+    <div class="pill-group" id="dateGroup">
+      <div class="pill active" data-val="0">I dag</div>
+      <div class="pill" data-val="1">I morgen</div>
+    </div>
+    <div id="weatherStatus" class="status-line">Henter vejrdataâ¦</div>
+    <div class="weather-days" id="weatherDays"></div>
+    <div class="status-line" id="weatherAdvice"></div>
+    <div class="schedule-note" id="scheduleDateNote" style="display:none;"></div>
+  </div>
+
+  <div class="card">
+    <h2>ðï¸ HvornÃ¥r er I ude?</h2>
+    <div class="pill-group" id="dayTypeGroup">
+      <div class="pill" data-val="weekend">Weekend / fridag</div>
+      <div class="pill" data-val="hverdag">Hverdag (efter hentning)</div>
+      <div class="pill" data-val="heldag">Heldagsarrangement</div>
+    </div>
+    <div class="pill-group" id="timeBlockGroup"></div>
+    <div class="schedule-note" id="scheduleNote"></div>
+  </div>
+
+  <div class="card">
+    <h2>ð¯ Hvad har I lyst til?</h2>
+    <div class="pill-group" id="prefGroup">
+      <div class="pill active" data-val="auto">Vejret bestemmer</div>
+      <div class="pill" data-val="ude">Kun udenfor</div>
+      <div class="pill" data-val="inde">Kun indenfor</div>
+    </div>
+    <div class="carousel-controls">
+      <button class="nav-btn" id="prevBtn" disabled>â Forrige</button>
+      <button class="big" id="nextBtn" style="flex:1;">ð² ForeslÃ¥ en aktivitet</button>
+    </div>
+    <div id="suggestionCounter" class="status-line" style="text-align:center;"></div>
+    <div id="suggestionBox"></div>
+  </div>
+
+  <div class="card">
+    <h2>ð Hele idÃ©banken</h2>
+    <div class="filter-bar" id="catFilter"></div>
+    <ul class="idea-list" id="ideaList"></ul>
+
+    <details style="margin-top:14px;">
+      <summary>â TilfÃ¸j din egen idÃ©</summary>
+      <div class="add-form">
+        <input type="text" id="newName" placeholder="Navn (f.eks. 'Legeplads ved...')">
+        <select id="newCat">
+          <option value="legeplads">Legeplads</option>
+          <option value="natur">Natur / gÃ¥tur</option>
+          <option value="indendoers">IndendÃ¸rs</option>
+          <option value="bad">Bad / bevÃ¦gelse</option>
+          <option value="heldag">Heldagsudflugt</option>
+        </select>
+        <input type="text" id="newArea" placeholder="Adresse / omrÃ¥de (valgfrit)">
+        <input type="number" id="newDist" placeholder="Ca. afstand fra Frodesvej i km (valgfrit)" min="0" step="0.5">
+        <textarea id="newNote" placeholder="Kort note (valgfrit)" rows="2"></textarea>
+        <button class="small-btn" id="addIdeaBtn" style="align-self:flex-start;">Gem idÃ©</button>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>ð Aktuelle arrangementer</h2>
+    <p class="status-line" style="margin-top:0;">
+      Arrangementer skifter fra uge til uge, sÃ¥ tjek disse kilder for det, der sker lige nu:
+    </p>
+    <div class="links">
+      <a href="https://www.visitaarhus.com/aarhus-region/see-and-do/family-holidays" target="_blank">VisitAarhus â familieoplevelser &amp; kalender â</a>
+      <a href="https://bornibyen.dk/aarhus" target="_blank">BÃ¸rn i Byen â Aarhus (ugentlige guides) â</a>
+      <a href="https://www.aarhus.dk/kultur-og-borgerservice/kultur-og-fritid/kulturkalender/" target="_blank">Aarhus Kommunes kulturkalender â</a>
+      <a href="https://dokk1.dk/kalender" target="_blank">Dokk1 â kalender (bl.a. filmvisning for de yngste) â</a>
+    </div>
+  </div>
+
+  <p class="footer-note">Afstande er ca. tal fra Frodesvej 28, ÃbyhÃ¸j, og skal ses som pejlemÃ¦rke â ikke en prÃ¦cis rutevejledning. IdÃ©banken bygger bl.a. pÃ¥ guides fra bornibyen.dk, visitaarhus.com og stedernes egne hjemmesider. Gem/tilfÃ¸j dine egne fund lÃ¸bende.</p>
+
+</div>
+
+<script>
+/* ---------- DATA ----------
+   distanceKm er en ca. kÃ¸re-/gÃ¥afstand fra Frodesvej 28, 8230 ÃbyhÃ¸j (jeres hjemmeadresse).
+   Brug tallene som pejlemÃ¦rke, ikke facit. */
+const SEED_IDEAS = [
+  {name:"Kloden, Dokk1", cat:"legeplads", area:"Hack Kampmanns Plads 2, Aarhus C", distanceKm:3, note:"Fem temaÃ¸er bygget over kontinenterne, med klatrestativer og rutsjebaner. Nem at komme til med barnevogn, og I kan smutte ind pÃ¥ biblioteket bagefter hvis det bliver koldt.", indoor:false, toddler:true},
+  {name:"Legeplads v. Det GrÃ¸nne StrÃ¸g (Aarhus Ã)", cat:"legeplads", area:"Aarhus Ã", distanceKm:4.5, note:"Trampoliner og store sÃ¦l/hvalros-skulpturer at klatre pÃ¥, plus en cykelbane (god igen nÃ¥r han selv cykler). Fin havnepromenade at gÃ¥ en tur pÃ¥ bagefter.", indoor:false, toddler:true},
+  {name:"Mindeparken legeplads", cat:"legeplads", area:"Carl Nielsens Vej, Aarhus C", distanceKm:3.5, note:"Flere legezoner og flot udsigt over bugten. Der er en cafÃ© i nÃ¦rheden, sÃ¥ det er oplagt til en hel formiddag med kaffe undervejs.", indoor:false, toddler:true},
+  {name:"Vesterlauget Ã sandkasse", cat:"legeplads", area:"Irma Pedersens Gade 180B, Aarhus Ã", distanceKm:4.5, note:"Stor sandkasse lige ved vandet, med restaurant og udsigt tÃ¦t pÃ¥ â perfekt niveau for en 15-mÃ¥neders, der elsker at grave og fylde.", indoor:false, toddler:true},
+  {name:"Marselisborg Havneplads", cat:"legeplads", area:"Marselisborg Havnevej 16, Aarhus C", distanceKm:4, note:"Gynger, rutsjebane, sandkasse og udsigt over lystbÃ¥dehavnen. God kombi med en gÃ¥tur langs kajen.", indoor:false, toddler:true},
+  {name:"Musikhusparken", cat:"legeplads", area:"Frederiks AllÃ© 16, Aarhus C", distanceKm:2.5, note:"Sandkasse og en lav rutsjebane er fine allerede nu â det store 5-meter klatretÃ¥rn og klatrevÃ¦ggen er mere til om et par Ã¥r.", indoor:false, toddler:true},
+  {name:"Skanseparken", cat:"legeplads", area:"Svendborgvej 15, Aarhus V", distanceKm:2.5, note:"Gynger og klatrenet, men mest af alt et stort Ã¥bent parkareal â rigtig godt til en, der er ved at finde sine ben og bare vil gÃ¥ og udforske.", indoor:false, toddler:true},
+  {name:"Botanisk Have â legeplads", cat:"legeplads", area:"Peter Holms Vej, Aarhus C", distanceKm:2, note:"Stort legeomrÃ¥de med vandelementer og karrusel. Ligger lige ved VÃ¦ksthusene, sÃ¥ I kan gÃ¥ direkte ind i varmen hvis det slÃ¥r om.", indoor:false, toddler:true},
+
+  {name:"Marselisborg Dyrehave", cat:"natur", area:"Ãrneredevej, HÃ¸jbjerg", distanceKm:5.5, note:"Gratis skovtur hvor I ofte kan komme tÃ¦t pÃ¥ de tamme rÃ¥dyr. Brede, jÃ¦vne stier, sÃ¥ barnevognen ruller nemt hele vejen.", indoor:false, toddler:true},
+  {name:"Moesgaard Strand & Skov", cat:"natur", area:"MoesgÃ¥rd AllÃ©, HÃ¸jbjerg", distanceKm:8, note:"Strand, skov og bakket terrÃ¦n samlet Ã©t sted â I kan selv vÃ¦lge om det bliver en kort gÃ¥tur eller en hel eftermiddag med madpakke.", indoor:false, toddler:true},
+  {name:"Risskov / Den Permanente", cat:"natur", area:"Risskov", distanceKm:5, note:"Strand og skov tÃ¦t pÃ¥ midtbyen. God til en kort frisk-luft-tur, evt. kombineret med en is fra kiosken om sommeren.", indoor:false, toddler:true},
+
+  {name:"Naturhistorisk Museum", cat:"indendoers", area:"Wilhelm Meyers AllÃ©, Aarhus C", distanceKm:2, note:"Gratis entrÃ© for bÃ¸rn. Udstoppede dyr og smÃ¥ udstillinger i bÃ¸rnehÃ¸jde â ikke stort, men perfekt dosis for en 15-mÃ¥neders pÃ¥ en kold eller vÃ¥d dag.", indoor:true, toddler:true},
+  {name:"VÃ¦ksthusene, Botanisk Have", cat:"indendoers", area:"Peter Holms Vej, Aarhus C", distanceKm:2, note:"Fire varme klimazoner med planter og fisk. Gratis entrÃ©, og bare det at gÃ¥ fra tropisk til kÃ¸ligt hus er en oplevelse i sig selv for en lille.", indoor:true, toddler:true},
+  {name:"Dokk1 â bibliotek & bÃ¸rneomrÃ¥de", cat:"indendoers", area:"Hack Kampmanns Plads 2, Aarhus C", distanceKm:3, note:"Stort bÃ¸rneomrÃ¥de med bÃ¸ger, puder og legetÃ¸j, Ã¥bent hele ugen. Enkelte sÃ¸ndage/mÃ¥neder er der korte filmvisninger (ca. 30 min. i alt) for de yngste â tjek dokk1.dk/kalender for datoer.", indoor:true, toddler:true},
+  {name:"Globus1 â lÃ¸rdagsleg (0-6 Ã¥r)", cat:"indendoers", area:"Gudrunsvej 3A, Brabrand", distanceKm:2.5, note:"Gratis forhindringsbane og fri leg i idrÃ¦tshallen, fÃ¸rste lÃ¸rdag i mÃ¥neden kl. 9-12. Ingen tilmelding â I mÃ¸der bare op.", indoor:true, toddler:true, schedule:{day:6, nth:1, label:"kun 1. lÃ¸rdag i mÃ¥neden, kl. 9-12"}},
+  {name:"Springcenter Aarhus â SÃ¸ndagsrÃ¦s", cat:"bad", area:"Hvidkildevej 11, Risskov", distanceKm:6, note:"Fri leg i to gymnastiksale. Tidsrummet 15:00-16:30 er for 1-4-Ã¥rige (andre aldersgrupper har slots tidligere om dagen). 60 kr. pr. barn og voksen, ingen tilmelding for enkeltbesÃ¸g. SÃ¦son lÃ¸ber ca. medio september til slut april.", indoor:true, toddler:true, schedule:{day:0, label:"kun sÃ¸ndage, jeres slot kl. 15:00-16:30"}},
+  {name:"Gellerupbadet â Plask & Leg", cat:"bad", area:"Dortesvej 43, Brabrand", distanceKm:1.5, note:"SÃ¸ndage kl. 9:00-10:00 er der plask & leg for 1-5-Ã¥rige med livredder til rÃ¥dighed, der guider aktiviteter i bassinet. KrÃ¦ver tilmelding via 'By i BevÃ¦gelse'.", indoor:true, toddler:true, schedule:{day:0, label:"kun sÃ¸ndage, kl. 9:00-10:00"}},
+
+  {name:"Tivoli Friheden", cat:"heldag", area:"Skovbrynet 5, Aarhus C", distanceKm:3, note:"Aarhus' forlystelsespark, kun 5 min. i bil. SÃ¦sonÃ¥bent (tjek friheden.dk for aktuelle Ã¥bningsdage) med en bÃ¸rneafdeling med rolige karruseller, som fungerer fint for en 15-mÃ¥neders. God til en heldag med frokostpause pÃ¥ stedet.", indoor:false, toddler:true},
+  {name:"Moesgaard Museum, strand & skov â hele dagen", cat:"heldag", area:"MoesgÃ¥rd AllÃ© 15, HÃ¸jbjerg", distanceKm:8, note:"Kombiner et kort museumsbesÃ¸g (gratis for bÃ¸rn) med skoven og stranden ned til vandet. God plads til at planlÃ¦gge luren omkring â enten kÃ¸r hjem midt pÃ¥ dagen, eller lad ham sove i klapvognen pÃ¥ stedet.", indoor:true, toddler:true},
+  {name:"Botanisk Have, VÃ¦ksthusene & Naturhistorisk Museum â hele dagen", cat:"heldag", area:"Peter Holms Vej, Aarhus C", distanceKm:2, note:"Alt samlet Ã©t sted: legeplads, varme vÃ¦ksthuse og museum. God 'lokal heldag' hvor I kan tage hjem til luren og ud igen om eftermiddagen, fordi det er sÃ¥ tÃ¦t pÃ¥.", indoor:false, toddler:true},
+  {name:"Randers Regnskov", cat:"heldag", area:"TÃ¸rvebryggen 11, Randers", distanceKm:40, note:"IndendÃ¸rs regnskovszoo med aber, fugle og krybdyr i varme, fugtige haller â smart alternativ pÃ¥ en regnvejrsdag, nÃ¥r I alligevel vil kÃ¸re en tur. Ca. 35-40 min. kÃ¸rsel, sÃ¥ planlÃ¦g luren i bilen pÃ¥ vej derned eller hjem.", indoor:true, toddler:true},
+  {name:"Aqua Akvarium & Dyrepark", cat:"heldag", area:"VejlsÃ¸vej 55, Silkeborg", distanceKm:43, note:"Akvarium med danske ferskvandsfisk, odderanlÃ¦g og udendÃ¸rs dyrepark med bl.a. bÃ¦ver og fiskeÃ¸rn. Blanding af inde og ude, sÃ¥ det fungerer i lidt af hvert vejr. Ca. 40-45 min. kÃ¸rsel.", indoor:false, toddler:true},
+  {name:"Ree Park Safari", cat:"heldag", area:"Djurslandvej 165, Ebeltoft", distanceKm:48, note:"Safaripark pÃ¥ Mols med bl.a. giraffer og zebraer, som I til dels kÃ¸rer igennem. SÃ¦sonÃ¥bent (tjek reepark.dk for Ã¥bningsdage) og en stÃ¸rre kÃ¸retur (ca. 45-50 min.), sÃ¥ mest oplagt som en fridag frem for en almindelig weekendeftermiddag.", indoor:false, toddler:true},
+];
+
+const STORAGE_KEY = "soren_udflugt_ideas_v1";
+const FAV_KEY = "soren_udflugt_favorites_v1";
+
+function loadCustomIdeas(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+function saveCustomIdeas(list){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }catch(e){}
+}
+function loadFavs(){
+  try{
+    const raw = localStorage.getItem(FAV_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function saveFavs(f){
+  try{ localStorage.setItem(FAV_KEY, JSON.stringify(f)); }catch(e){}
+}
+
+let customIdeas = loadCustomIdeas();
+let favorites = loadFavs();
+function allIdeas(){ return SEED_IDEAS.concat(customIdeas); }
+
+/* ---------- STATE ---------- */
+let state = {
+  dayType: "weekend",
+  timeBlock: null,
+  pref: "auto",
+  catFilter: "alle",
+  weatherOutdoorOK: null, // true/false/null(unknown)
+  dayOffset: 0, // 0 = i dag, 1 = i morgen
+  suggestionHistory: [], // "karrusel" af tidligere/nuvÃ¦rende forslag
+  suggestionIndex: -1
+};
+
+function resetSuggestionCarousel(){
+  state.suggestionHistory = [];
+  state.suggestionIndex = -1;
+  document.getElementById('suggestionBox').innerHTML = "";
+  document.getElementById('suggestionCounter').textContent = "";
+  document.getElementById('prevBtn').disabled = true;
+  document.getElementById('nextBtn').textContent = "ð² ForeslÃ¥ en aktivitet";
+}
+
+function selectedDate(){
+  const d = new Date();
+  d.setDate(d.getDate() + state.dayOffset);
+  return d;
+}
+const DAY_NAMES_LONG = ["sÃ¸ndag","mandag","tirsdag","onsdag","torsdag","fredag","lÃ¸rdag"];
+function nthWeekdayOfMonth(date){ return Math.ceil(date.getDate()/7); }
+
+// Tjekker om en idÃ© med fast ugedag/uge-nummer passer pÃ¥ den valgte dato.
+// Returnerer null hvis idÃ©en ikke er dagslÃ¥st, ellers {ok, label}.
+function scheduleStatus(idea, date){
+  if(!idea.schedule) return null;
+  const s = idea.schedule;
+  const matchesDay = date.getDay() === s.day;
+  const matchesNth = s.nth ? nthWeekdayOfMonth(date) === s.nth : true;
+  const ok = matchesDay && matchesNth;
+  return { ok, label: s.label || ("kun " + DAY_NAMES_LONG[s.day]) };
+}
+
+document.getElementById('dateGroup').addEventListener('click', (e)=>{
+  const pill = e.target.closest('.pill');
+  if(!pill) return;
+  document.querySelectorAll('#dateGroup .pill').forEach(p=>p.classList.remove('active'));
+  pill.classList.add('active');
+  state.dayOffset = parseInt(pill.dataset.val, 10);
+  renderWeather();
+  renderIdeaList();
+  resetSuggestionCarousel();
+});
+
+/* ---------- SCHEDULE ---------- */
+const BLOCKS = {
+  weekend: [
+    {key:"formiddag", label:"Formiddag (til ca. kl. 11)", note:"God tid â oplagt til en lÃ¦ngere udflugt fÃ¸r luren kl. 11:30-13:30."},
+    {key:"eftermiddag", label:"Eftermiddag (13:30â16:30)", note:"Efter luren â fin tid til legeplads, museum eller en gÃ¥tur."},
+    {key:"seneftermiddag", label:"Sen eftermiddag (16:30â18:30)", note:"Kortere vindue fÃ¸r aftenrutinen starter ca. kl. 19 â hold det tÃ¦t pÃ¥ hjemmet (under ca. 5 km)."}
+  ],
+  hverdag: [
+    {key:"efterhentning", label:"Efter hentning (15:30â18:30)", note:"Han er hentet fra vuggestue â kort tur eller legeplads tÃ¦t pÃ¥ (under ca. 5 km) inden aftenrutinen kl. 19."}
+  ],
+  heldag: [
+    {key:"heledagen", label:"Hele dagen", note:"Et rigtigt udflugtssted, evt. lÃ¦ngere vÃ¦k. PlanlÃ¦g luren ind: sov hjemmefra fÃ¸r I kÃ¸rer, lad ham sove i bilen/klapvognen undervejs, eller vÃ¦lg noget tÃ¦t pÃ¥ sÃ¥ I kan kÃ¸re hjem til kl. 11:30-13:30 og ud igen bagefter."}
+  ]
+};
+
+function renderDayType(){
+  document.querySelectorAll('#dayTypeGroup .pill').forEach(p=>{
+    p.classList.toggle('active', p.dataset.val === state.dayType);
+  });
+  const blocks = BLOCKS[state.dayType];
+  if(!blocks.find(b=>b.key===state.timeBlock)) state.timeBlock = blocks[0].key;
+  renderTimeBlocks();
+}
+function renderTimeBlocks(){
+  const group = document.getElementById('timeBlockGroup');
+  const blocks = BLOCKS[state.dayType];
+  group.innerHTML = "";
+  blocks.forEach(b=>{
+    const el = document.createElement('div');
+    el.className = 'pill' + (b.key===state.timeBlock?' active':'');
+    el.textContent = b.label;
+    el.dataset.val = b.key;
+    el.onclick = ()=>{ state.timeBlock = b.key; renderTimeBlocks(); resetSuggestionCarousel(); };
+    group.appendChild(el);
+  });
+  const active = blocks.find(b=>b.key===state.timeBlock);
+  document.getElementById('scheduleNote').textContent = active ? active.note : "";
+}
+
+document.getElementById('dayTypeGroup').addEventListener('click', (e)=>{
+  const pill = e.target.closest('.pill');
+  if(!pill) return;
+  state.dayType = pill.dataset.val;
+  renderDayType();
+  resetSuggestionCarousel();
+});
+
+document.getElementById('prefGroup').addEventListener('click', (e)=>{
+  const pill = e.target.closest('.pill');
+  if(!pill) return;
+  document.querySelectorAll('#prefGroup .pill').forEach(p=>p.classList.remove('active'));
+  pill.classList.add('active');
+  state.pref = pill.dataset.val;
+  resetSuggestionCarousel();
+});
+
+/* ---------- WEATHER ---------- */
+const LAT = 56.1551, LON = 10.1693; // Frodesvej, ÃbyhÃ¸j
+const WMO = {
+  0:["Klar himmel","âï¸"],1:["Mest klart","ð¤ï¸"],2:["Delvist skyet","â"],3:["Skyet","âï¸"],
+  45:["TÃ¥ge","ð«ï¸"],48:["TÃ¥ge","ð«ï¸"],
+  51:["Let stÃ¸vregn","ð¦ï¸"],53:["StÃ¸vregn","ð¦ï¸"],55:["TÃ¦t stÃ¸vregn","ð§ï¸"],
+  56:["Frysende stÃ¸vregn","ð§ï¸"],57:["Frysende stÃ¸vregn","ð§ï¸"],
+  61:["Let regn","ð§ï¸"],63:["Regn","ð§ï¸"],65:["Kraftig regn","ð§ï¸"],
+  66:["Frysende regn","ð§ï¸"],67:["Frysende regn","ð§ï¸"],
+  71:["Let snefald","ð¨ï¸"],73:["Snefald","ð¨ï¸"],75:["Kraftigt snefald","âï¸"],77:["Snekorn","âï¸"],
+  80:["Regnbyger","ð¦ï¸"],81:["Regnbyger","ð¦ï¸"],82:["Voldsomme byger","âï¸"],
+  85:["Snebyger","ð¨ï¸"],86:["Snebyger","ð¨ï¸"],
+  95:["Tordenvejr","âï¸"],96:["Tordenvejr m. hagl","âï¸"],99:["Tordenvejr m. hagl","âï¸"]
+};
+function wmoText(code){ return (WMO[code] || ["Ukendt vejr","ð¡ï¸"])[0]; }
+function wmoIcon(code){ return (WMO[code] || ["Ukendt vejr","ð¡ï¸"])[1]; }
+
+let forecast = null;
+
+async function fetchWeather(){
+  const statusEl = document.getElementById('weatherStatus');
+  try{
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=Europe%2FCopenhagen&forecast_days=4`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error("net");
+    const data = await res.json();
+    forecast = data.daily;
+    statusEl.textContent = "Vejrdata for Aarhus, opdateret nu:";
+    renderWeather();
+  }catch(e){
+    statusEl.innerHTML = "Kunne ikke hente live-vejr lige nu. <button class='small-btn' id='retryWeather'>PrÃ¸v igen</button> â eller vÃ¦lg selv 'Kun udenfor'/'Kun indenfor' ovenfor.";
+    const retry = document.getElementById('retryWeather');
+    if(retry) retry.onclick = fetchWeather;
+    state.weatherOutdoorOK = null;
+  }
+}
+
+function renderWeather(){
+  if(!forecast) return;
+  const days = forecast.time;
+  const dayNames = ["SÃ¸ndag","Mandag","Tirsdag","Onsdag","Torsdag","Fredag","LÃ¸rdag"];
+  const container = document.getElementById('weatherDays');
+  container.innerHTML = "";
+  days.forEach((d, i)=>{
+    const date = new Date(d);
+    const label = i===0 ? "I dag" : (i===1 ? "I morgen" : dayNames[date.getDay()]);
+    const code = forecast.weather_code[i];
+    const tmax = Math.round(forecast.temperature_2m_max[i]);
+    const tmin = Math.round(forecast.temperature_2m_min[i]);
+    const rain = forecast.precipitation_probability_max[i];
+    const wind = forecast.wind_speed_10m_max[i];
+    const div = document.createElement('div');
+    div.className = 'wday' + (i === state.dayOffset ? ' selected' : '');
+    div.innerHTML = `<div class="lbl">${label}</div><div class="icon">${wmoIcon(code)}</div>
+      <div class="temp">${tmin}Â°â${tmax}Â°</div><div class="rain">â ${rain}%</div>`;
+    container.appendChild(div);
+  });
+
+  // Determine outdoor-friendliness for the valgte dag (i dag = index 0, i morgen = index 1, ...)
+  const idx = state.dayOffset;
+  const rain0 = forecast.precipitation_probability_max[idx];
+  const tmax0 = forecast.temperature_2m_max[idx];
+  const wind0 = forecast.wind_speed_10m_max[idx];
+  const nar = idx === 0 ? "i dag" : (idx === 1 ? "i morgen" : "den dag");
+  let outdoorOK, advice;
+  if(rain0 < 30 && tmax0 > 3 && wind0 < 35){
+    outdoorOK = true;
+    advice = `âï¸ Ser fint ud til udeaktiviteter ${nar}.`;
+  } else if(rain0 >= 60 || tmax0 <= 0 || wind0 >= 45){
+    outdoorOK = false;
+    advice = `ð§ï¸ Bedst med en indendÃ¸rs plan ${nar} â eller kort udetur i regntÃ¸j.`;
+  } else {
+    outdoorOK = null;
+    advice = `â Blandet vejr ${nar} â tag regnjakke med, og hold ude-turen kort.`;
+  }
+  state.weatherOutdoorOK = outdoorOK;
+  document.getElementById('weatherAdvice').textContent = advice;
+
+  // Vis besked hvis nogen dagslÃ¥ste aktiviteter matcher/ikke matcher den valgte dato
+  const dateForCheck = selectedDate();
+  const scheduled = allIdeas().filter(i => i.schedule);
+  const hits = scheduled.filter(i => scheduleStatus(i, dateForCheck)?.ok).map(i=>i.name);
+  const noteEl = document.getElementById('scheduleDateNote');
+  if(hits.length){
+    noteEl.style.display = "block";
+    noteEl.textContent = `ð ${nar==="i dag"?"I dag":"I morgen"} (${DAY_NAMES_LONG[dateForCheck.getDay()]}) passer bl.a.: ${hits.join(", ")}.`;
+  } else {
+    noteEl.style.display = "block";
+    noteEl.textContent = `ð ${nar==="i dag"?"I dag":"I morgen"} (${DAY_NAMES_LONG[dateForCheck.getDay()]}) er der ingen af de faste dags-events (Springcenter/Gellerupbadet er sÃ¸ndage, Globus1 er 1. lÃ¸rdag i mÃ¥neden) â se idÃ©banken for de Ã¸vrige, dato-uafhÃ¦ngige idÃ©er.`;
+  }
+}
+
+/* ---------- IDEA RENDERING ---------- */
+const CAT_LABELS = {alle:"Alle", legeplads:"Legepladser", natur:"Natur/gÃ¥tur", indendoers:"IndendÃ¸rs", bad:"Bad/bevÃ¦gelse", heldag:"Heldagsudflugt"};
+
+function renderCatFilter(){
+  const bar = document.getElementById('catFilter');
+  bar.innerHTML = "";
+  Object.keys(CAT_LABELS).forEach(key=>{
+    const el = document.createElement('div');
+    el.className = 'pill' + (state.catFilter===key ? ' active' : '');
+    el.textContent = CAT_LABELS[key];
+    el.onclick = ()=>{ state.catFilter = key; renderCatFilter(); renderIdeaList(); };
+    bar.appendChild(el);
+  });
+}
+
+function distanceLabel(km){
+  if(km === undefined || km === null || isNaN(km)) return "";
+  return km < 10 ? `~${km} km hjemmefra` : `~${Math.round(km)} km hjemmefra`;
+}
+
+function renderIdeaList(){
+  const list = document.getElementById('ideaList');
+  list.innerHTML = "";
+  const ideas = allIdeas()
+    .filter(idea => state.catFilter==="alle" || idea.cat===state.catFilter)
+    .slice()
+    .sort((a,b)=>{
+      const da = (a.distanceKm===undefined||a.distanceKm===null) ? 999 : a.distanceKm;
+      const db = (b.distanceKm===undefined||b.distanceKm===null) ? 999 : b.distanceKm;
+      return da - db;
+    });
+  ideas.forEach((idea, i)=>{
+    const li = document.createElement('li');
+    li.className = 'idea';
+    const favKey = idea.name;
+    const isFav = !!favorites[favKey];
+    const mapUrl = "https://www.google.com/maps/search/" + encodeURIComponent(idea.name + " " + (idea.area||"") + " Aarhus");
+    const distTag = idea.distanceKm !== undefined ? `<span class="tag dist">${distanceLabel(idea.distanceKm)}</span>` : "";
+    const sched = scheduleStatus(idea, selectedDate());
+    const schedTag = sched
+      ? (sched.ok
+          ? `<span class="tag hit">â passer ${state.dayOffset===0?'i dag':'i morgen'}</span>`
+          : `<span class="tag miss">â ikke ${state.dayOffset===0?'i dag':'i morgen'} â ${sched.label}</span>`)
+      : "";
+    li.innerHTML = `<span class="star ${isFav?'on':''}" data-fav="${favKey}">â</span>
+      <span class="name">${idea.name}</span>
+      <span class="tag">${CAT_LABELS[idea.cat] || idea.cat}</span>
+      ${idea.indoor ? '<span class="tag">indendÃ¸rs</span>' : '<span class="tag">udendÃ¸rs</span>'}
+      ${distTag}
+      ${schedTag}
+      <div class="note">${idea.area ? idea.area + " â " : ""}${idea.note || ""}</div>
+      <a class="map" href="${mapUrl}" target="_blank">Vis pÃ¥ kort â</a>`;
+    list.appendChild(li);
+  });
+  list.querySelectorAll('.star').forEach(s=>{
+    s.onclick = ()=>{
+      const key = s.dataset.fav;
+      favorites[key] = !favorites[key];
+      saveFavs(favorites);
+      renderIdeaList();
+    };
+  });
+}
+
+/* ---------- SUGGESTION ENGINE ---------- */
+function pickSuggestion(){
+  let pool = allIdeas();
+
+  // Udeluk dagslÃ¥ste aktiviteter der ikke passer pÃ¥ den valgte dato (fx Springcenter/Gellerupbadet uden for sÃ¸ndag)
+  const dateForCheck = selectedDate();
+  pool = pool.filter(i => {
+    const s = scheduleStatus(i, dateForCheck);
+    return s === null || s.ok;
+  });
+
+  // Heldagsarrangement: prioriter heldags-idÃ©er, men fald tilbage til hele banken hvis den er tom
+  if(state.dayType === "heldag"){
+    const heldagPool = pool.filter(i => i.cat === "heldag");
+    if(heldagPool.length) pool = heldagPool;
+  } else {
+    // undgÃ¥ at forslÃ¥ heldagsudflugter til en almindelig weekend-/hverdagstur
+    pool = pool.filter(i => i.cat !== "heldag");
+  }
+
+  // filter by indoor/outdoor preference
+  let wantOutdoor;
+  if(state.pref === "ude") wantOutdoor = true;
+  else if(state.pref === "inde") wantOutdoor = false;
+  else wantOutdoor = state.weatherOutdoorOK; // may be true/false/null
+
+  if(wantOutdoor === true){
+    const outdoorPool = pool.filter(i => !i.indoor);
+    if(outdoorPool.length) pool = outdoorPool;
+  } else if(wantOutdoor === false){
+    const indoorPool = pool.filter(i => i.indoor);
+    if(indoorPool.length) pool = indoorPool;
+  }
+  // if null (blandet vejr / ukendt), don't filter â allow both
+
+  // For short weekday/late-afternoon windows: hold jer tÃ¦t pÃ¥ (under ca. 5 km) og prioriter legeplads/bad/indendÃ¸rs
+  if(state.timeBlock === "seneftermiddag" || state.timeBlock === "efterhentning"){
+    const nearbyPool = pool.filter(i => (i.distanceKm===undefined || i.distanceKm <= 5) &&
+      (i.cat === "legeplads" || i.cat === "bad" || i.cat==="indendoers"));
+    if(nearbyPool.length) pool = nearbyPool;
+  }
+
+  if(pool.length === 0){
+    // Fald tilbage til alle idÃ©er der stadig respekterer dags-lÃ¥sning
+    pool = allIdeas().filter(i => {
+      const s = scheduleStatus(i, dateForCheck);
+      return s === null || s.ok;
+    });
+  }
+  if(pool.length === 0) pool = allIdeas(); // sidste udvej hvis alt er filtreret fra
+
+  // UndgÃ¥ at gentage det forslag der allerede stÃ¥r fremme, hvis der er andre muligheder
+  const current = state.suggestionHistory[state.suggestionIndex];
+  if(pool.length > 1 && current){
+    const withoutCurrent = pool.filter(i => i.name !== current.name);
+    if(withoutCurrent.length) pool = withoutCurrent;
+  }
+
+  const pick = pool[Math.floor(Math.random()*pool.length)];
+  return pick;
+}
+
+/* ---------- KARRUSEL (forrige / nÃ¦ste forslag) ---------- */
+function renderSuggestionCard(idea){
+  const box = document.getElementById('suggestionBox');
+  const mapUrl = "https://www.google.com/maps/search/" + encodeURIComponent(idea.name + " " + (idea.area||"") + " Aarhus");
+  const distTxt = idea.distanceKm !== undefined ? ` Â· ${distanceLabel(idea.distanceKm)}` : "";
+  const iconIdx = state.dayOffset;
+  const icon = wmoIcon(forecast && forecast.weather_code ? forecast.weather_code[iconIdx] : 0);
+  const sched = scheduleStatus(idea, selectedDate());
+  const schedTxt = sched && sched.ok ? ` Â· passer ${state.dayOffset===0?'i dag':'i morgen'} (${sched.label})` : "";
+  box.innerHTML = `<div class="suggestion">
+    <h3>${icon} ${idea.name}</h3>
+    <div class="meta">${CAT_LABELS[idea.cat]} Â· ${idea.indoor ? "indendÃ¸rs" : "udendÃ¸rs"}${distTxt}${schedTxt} ${idea.area ? "Â· "+idea.area : ""}</div>
+    <div>${idea.note || ""}</div>
+    <div style="margin-top:8px;"><a href="${mapUrl}" target="_blank">Vis pÃ¥ kort â</a></div>
+  </div>`;
+
+  document.getElementById('suggestionCounter').textContent =
+    `Forslag ${state.suggestionIndex + 1} af ${state.suggestionHistory.length}`;
+  document.getElementById('prevBtn').disabled = state.suggestionIndex <= 0;
+  document.getElementById('nextBtn').textContent = "NÃ¦ste forslag â¶";
+}
+
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  if(state.suggestionIndex < state.suggestionHistory.length - 1){
+    // Der findes allerede et "nÃ¦ste" i historikken (fordi man er gÃ¥et tilbage) â gÃ¥ frem i den
+    state.suggestionIndex++;
+  } else {
+    const idea = pickSuggestion();
+    state.suggestionHistory.push(idea);
+    state.suggestionIndex = state.suggestionHistory.length - 1;
+  }
+  renderSuggestionCard(state.suggestionHistory[state.suggestionIndex]);
+});
+
+document.getElementById('prevBtn').addEventListener('click', ()=>{
+  if(state.suggestionIndex > 0){
+    state.suggestionIndex--;
+    renderSuggestionCard(state.suggestionHistory[state.suggestionIndex]);
+  }
+});
+
+/* ---------- ADD IDEA ---------- */
+document.getElementById('addIdeaBtn').addEventListener('click', ()=>{
+  const name = document.getElementById('newName').value.trim();
+  if(!name) return;
+  const cat = document.getElementById('newCat').value;
+  const area = document.getElementById('newArea').value.trim();
+  const note = document.getElementById('newNote').value.trim();
+  const distRaw = document.getElementById('newDist').value;
+  const distanceKm = distRaw !== "" ? parseFloat(distRaw) : undefined;
+  const indoor = (cat === "indendoers" || cat === "bad");
+  customIdeas.push({name, cat, area, note, indoor, distanceKm, toddler:true});
+  saveCustomIdeas(customIdeas);
+  document.getElementById('newName').value = "";
+  document.getElementById('newArea').value = "";
+  document.getElementById('newDist').value = "";
+  document.getElementById('newNote').value = "";
+  renderIdeaList();
+});
+
+/* ---------- INIT ---------- */
+renderDayType();
+renderCatFilter();
+renderIdeaList();
+fetchWeather();
+</script>
+</body>
+</html>
