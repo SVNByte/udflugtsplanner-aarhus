@@ -6,16 +6,16 @@
 <title>Udflugtsplanner – Aarhus</title>
 <style>
   :root{
-    --bg:#faf7f2;
+    --bg:#f6f5ee;
     --card:#ffffff;
-    --ink:#2b2620;
-    --muted:#7a7268;
-    --accent:#e07a45;
-    --accent-dark:#c05f2f;
+    --ink:#262b23;
+    --muted:#6f7568;
+    --accent:#7c9473;
+    --accent-dark:#5c7350;
     --sun:#f0a93c;
     --rain:#4a7fa6;
-    --green:#5c8a5c;
-    --border:#e8e0d5;
+    --green:#5c7350;
+    --border:#e2e6da;
     --radius:14px;
   }
   *{box-sizing:border-box;}
@@ -27,7 +27,7 @@
     padding-bottom:60px;
   }
   header{
-    background:linear-gradient(135deg,#e07a45,#c05f2f);
+    background:linear-gradient(135deg,#7c9473,#5c7350);
     color:white;
     padding:22px 18px 26px;
     text-align:center;
@@ -63,7 +63,7 @@
   .wday{
     flex:1 0 90px;
     text-align:center;
-    background:#fbf5ee;
+    background:#f2f4ec;
     border-radius:10px;
     padding:10px 6px;
     font-size:.82rem;
@@ -72,12 +72,12 @@
   .wday .lbl{font-weight:600;color:var(--muted);margin-bottom:2px;text-transform:capitalize;}
   .wday .temp{font-weight:600;margin-top:2px;}
   .wday .rain{color:var(--rain);font-size:.78rem;}
-  .wday.selected{background:#fce6d4;outline:2px solid var(--accent);}
+  .wday.selected{background:#e3ead9;outline:2px solid var(--accent);}
   .idea .tag.miss{background:#f7e2df;color:#a0453a;}
-  .idea .tag.hit{background:#e2f1e6;color:var(--green);}
+  .idea .tag.hit{background:#fdf2d9;color:#a6790f;}
   .status-line{font-size:.85rem;color:var(--muted);margin-top:8px;}
   .schedule-note{
-    background:#f4efe4;
+    background:#eef1e6;
     border-radius:10px;
     padding:10px 12px;
     font-size:.85rem;
@@ -115,7 +115,7 @@
     border:2px solid var(--accent);
     border-radius:12px;
     padding:14px;
-    background:#fff8f2;
+    background:#f4f7ef;
   }
   .suggestion h3{margin:0 0 4px;font-size:1.1rem;}
   .suggestion .meta{font-size:.85rem;color:var(--muted);margin-bottom:6px;}
@@ -138,7 +138,7 @@
     vertical-align:middle;
   }
   .idea .note{font-size:.85rem;color:var(--muted);margin-top:2px;}
-  .idea .tag.dist{background:#eaf2e8;color:var(--green);}
+  .idea .tag.dist{background:#e7ede2;color:var(--green);}
   .idea a.map{font-size:.78rem;color:var(--accent-dark);}
   .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
   details summary{cursor:pointer;font-weight:600;padding:4px 0;}
