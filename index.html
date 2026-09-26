@@ -165,7 +165,7 @@
 <div class="wrap">
 
   <div class="card" id="weatherCard">
-    <h2>🌤️ Vejret ved Åbyhøj</h2>
+    <h2>🌤️ Vejret ved Åbyhøj<button class="small-btn" id="refreshWeatherBtn" style="margin-left:auto;font-size:.78rem;padding:4px 10px;" title="Hent nye vejrdata">🔄 Opdater</button></h2>
     <div class="pill-group" id="dateGroup">
       <div class="pill active" data-val="0">I dag</div>
       <div class="pill" data-val="1">I morgen</div>
@@ -436,21 +436,28 @@ let forecast = null;
 
 async function fetchWeather(){
   const statusEl = document.getElementById('weatherStatus');
+  const refreshBtn = document.getElementById('refreshWeatherBtn');
+  if(refreshBtn){ refreshBtn.disabled = true; refreshBtn.textContent = "🔄 Henter…"; }
   try{
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=Europe%2FCopenhagen&forecast_days=4`;
     const res = await fetch(url);
     if(!res.ok) throw new Error("net");
     const data = await res.json();
     forecast = data.daily;
-    statusEl.textContent = "Vejrdata for Aarhus, opdateret nu:";
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('da-DK', {hour:'2-digit', minute:'2-digit'});
+    statusEl.textContent = `Vejrdata for Aarhus, opdateret kl. ${timeStr}:`;
     renderWeather();
   }catch(e){
     statusEl.innerHTML = "Kunne ikke hente live-vejr lige nu. <button class='small-btn' id='retryWeather'>Prøv igen</button> – eller vælg selv 'Kun udenfor'/'Kun indenfor' ovenfor.";
     const retry = document.getElementById('retryWeather');
     if(retry) retry.onclick = fetchWeather;
     state.weatherOutdoorOK = null;
+  }finally{
+    if(refreshBtn){ refreshBtn.disabled = false; refreshBtn.textContent = "🔄 Opdater"; }
   }
 }
+document.getElementById('refreshWeatherBtn').addEventListener('click', fetchWeather);
 
 function renderWeather(){
   if(!forecast) return;
